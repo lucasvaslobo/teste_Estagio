@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CEP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); text-align: center;
+        }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        button { background: #007bff; color: #fff; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta CEP</h1>
+        <input id="cep" placeholder="Digite o CEP">
+        <input id="unidade" placeholder="Digite a unidade">
+        <input id="complemento" placeholder="Digite o complemento">
+        <button onclick="consultarCEP()">Consultar</button>
+        <div id="result"></div>
+    </div>
+    <script>
+        async function consultarCEP() {
+            const cep = document.getElementById("cep").value;
+            const unidade = document.getElementById("unidade").value || "Não informado";
+            const complemento = document.getElementById("complemento").value || "Não informado";
+            const result = document.getElementById("result");
+            result.innerHTML = "";
+
+            if (!/^\d{8}$/.test(cep)) {
+                result.innerHTML = `<p class="error">CEP inválido.</p>`;
+                return;
+            }
+
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+                if (data.erro) {
+                    result.innerHTML = `<p class="error">CEP não encontrado.</p>`;
+                } else {
+                    const {
+                        logradouro = "Não informado",
+                        bairro = "Não informado",
+                        localidade = "Não informado",
+                        uf = "Não informado",
+                        estado = "Não informado",
+                        regiao = "Não informado",
+                        ibge = "Não informado",
+                        gia = "Não informado",
+                        ddd = "Não informado"
+                    } = data;
+
+                    result.innerHTML = `
+                        <p><b>CEP:</b> ${cep}</p>
+                        <p><b>Logradouro:</b> ${logradouro}</p>
+                        <p><b>Bairro:</b> ${bairro}</p>
+                        <p><b>Localidade:</b> ${localidade}</p>
+                        <p><b>Estado:</b> ${estado}</p>
+                        <p><b>Região:</b> ${regiao}</p>
+                        <p><b>UF:</b> ${uf}</p>
+                        <p><b>IBGE:</b> ${ibge}</p>
+                        <p><b>GIA:</b> ${gia}</p>
+                        <p><b>DDD:</b> ${ddd}</p>
+                        <p><b>Unidade:</b> ${unidade}</p>
+                        <p><b>Complemento:</b> ${complemento}</p>`;
+                }
+            } catch {
+                result.innerHTML = `<p class="error">Erro ao consultar o CEP.</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
